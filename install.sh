@@ -14,12 +14,14 @@ fi
 
 SRC_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-source "${SRC_DIR}/lib_colors.sh"
-
 THEME_NAME=Colloid
-COLOR_VARIANTS=('-Light' '-Dark' '')
 THEME_VARIANTS=('' '-Purple' '-Pink' '-Red' '-Orange' '-Yellow' '-Green' '-Teal' '-Grey')
 SCHEME_VARIANTS=('' '-Nord' '-Dracula' '-Gruvbox' '-Everforest' '-Catppuccin')
+COLOR_VARIANTS=('-Light' '-Dark' '')
+
+themes=()
+schemes=()
+colors=()
 
 usage() {
 cat << EOF
@@ -62,9 +64,10 @@ install() {
 
     colors_folder
 
-    if [[ "${theme}" != '' ]]; then
+    if [[ "${scheme}" != '' || "${theme}" != '' ]]; then
       cp -r "${SRC_DIR}"/notint/*.svg                                                       "${THEME_DIR}"/places/scalable
       sed -i "s/#60c0f0/${theme_color}/g"                                                   "${THEME_DIR}"/places/scalable/*.svg
+      sed -i "s/#60c0f0/${theme_color}/g"                                                   "${THEME_DIR}"/apps/scalable/*.svg
     fi
 
     cp -r "${SRC_DIR}"/links/*                                                               "${THEME_DIR}"
@@ -74,31 +77,33 @@ install() {
     mkdir -p                                                                                "${THEME_DIR}"/{apps,categories,devices,emblems,mimetypes,places,status}
     cp -r "${SRC_DIR}"/src/actions                                                          "${THEME_DIR}"
     cp -r "${SRC_DIR}"/src/apps/{22,symbolic}                                               "${THEME_DIR}"/apps
-    cp -r "${SRC_DIR}"/src/categories/symbolic                                              "${THEME_DIR}"/categories
+    cp -r "${SRC_DIR}"/src/categories/{22,symbolic}                                         "${THEME_DIR}"/categories
     cp -r "${SRC_DIR}"/src/emblems/symbolic                                                 "${THEME_DIR}"/emblems
     cp -r "${SRC_DIR}"/src/mimetypes/symbolic                                               "${THEME_DIR}"/mimetypes
     cp -r "${SRC_DIR}"/src/devices/{16,22,24,32,symbolic}                                   "${THEME_DIR}"/devices
-    cp -r "${SRC_DIR}"/src/places/{16,22,24,symbolic}                                       "${THEME_DIR}"/places
+    cp -r "${SRC_DIR}"/src/places/{16,22,24,scalable,symbolic}                              "${THEME_DIR}"/places
     cp -r "${SRC_DIR}"/src/status/{16,22,24,symbolic}                                       "${THEME_DIR}"/status
+
+    cp -r "${SRC_DIR}"/dark/*.svg                                                           "${THEME_DIR}"/places/scalable
 
     # Change icon color for dark theme
     sed -i "s/#363636/#dedede/g" "${THEME_DIR}"/{actions,devices,places,status}/{16,22,24}/*.svg
     sed -i "s/#363636/#dedede/g" "${THEME_DIR}"/{actions,devices}/32/*.svg
     sed -i "s/#363636/#dedede/g" "${THEME_DIR}"/apps/22/*.svg
+    sed -i "s/#363636/#dedede/g" "${THEME_DIR}"/categories/22/*.svg
     sed -i "s/#363636/#dedede/g" "${THEME_DIR}"/{actions,apps,categories,devices,emblems,mimetypes,places,status}/symbolic/*.svg
 
     cp -r "${SRC_DIR}"/links/actions/{16,22,24,32,symbolic}                                 "${THEME_DIR}"/actions
     cp -r "${SRC_DIR}"/links/devices/{16,22,24,32,symbolic}                                 "${THEME_DIR}"/devices
-    cp -r "${SRC_DIR}"/links/places/{16,22,24,symbolic}                                     "${THEME_DIR}"/places
+    cp -r "${SRC_DIR}"/links/places/{16,22,24,scalable,symbolic}                            "${THEME_DIR}"/places
     cp -r "${SRC_DIR}"/links/status/{16,22,24,symbolic}                                     "${THEME_DIR}"/status
     cp -r "${SRC_DIR}"/links/apps/{22,symbolic}                                             "${THEME_DIR}"/apps
-    cp -r "${SRC_DIR}"/links/categories/symbolic                                            "${THEME_DIR}"/categories
+    cp -r "${SRC_DIR}"/links/categories/{22,symbolic}                                       "${THEME_DIR}"/categories
     cp -r "${SRC_DIR}"/links/mimetypes/symbolic                                             "${THEME_DIR}"/mimetypes
 
     cd "${dest}"
     ln -sf ../../"${name}${theme}${scheme}"-Light/apps/scalable "${name}${theme}${scheme}"-Dark/apps/scalable
     ln -sf ../../"${name}${theme}${scheme}"-Light/devices/scalable "${name}${theme}${scheme}"-Dark/devices/scalable
-    ln -sf ../../"${name}${theme}${scheme}"-Light/places/scalable "${name}${theme}${scheme}"-Dark/places/scalable
     ln -sf ../../"${name}${theme}${scheme}"-Light/categories/32 "${name}${theme}${scheme}"-Dark/categories/32
     ln -sf ../../"${name}${theme}${scheme}"-Light/emblems/16 "${name}${theme}${scheme}"-Dark/emblems/16
     ln -sf ../../"${name}${theme}${scheme}"-Light/emblems/22 "${name}${theme}${scheme}"-Dark/emblems/22
@@ -133,6 +138,198 @@ install() {
   gtk-update-icon-cache "${THEME_DIR}"
 }
 
+colors_folder() {
+  case "$theme" in
+    '')
+      theme_color='#5b9bf8'
+      ;;
+    -Purple)
+      theme_color='#BA68C8'
+      ;;
+    -Pink)
+      theme_color='#F06292'
+      ;;
+    -Red)
+      theme_color='#F44336'
+      ;;
+    -Orange)
+      theme_color='#FB8C00'
+      ;;
+    -Yellow)
+      theme_color='#FFD600'
+      ;;
+    -Green)
+      theme_color='#66BB6A'
+      ;;
+    -Teal)
+      theme_color='#4DB6AC'
+      ;;
+    -Grey)
+      theme_color='#888888'
+      ;;
+  esac
+
+  if [[ "$scheme" == '-Nord' ]]; then
+    case "$theme" in
+      '')
+        theme_color='#89a3c2'
+        ;;
+      -Purple)
+        theme_color='#c89dbf'
+        ;;
+      -Pink)
+        theme_color='#dc98b1'
+        ;;
+      -Red)
+        theme_color='#d4878f'
+        ;;
+      -Orange)
+        theme_color='#dca493'
+        ;;
+      -Yellow)
+        theme_color='#eac985'
+        ;;
+      -Green)
+        theme_color='#a0c082'
+        ;;
+      -Teal)
+        theme_color='#83b9b8'
+        ;;
+      -Grey)
+        theme_color='#757a99'
+        ;;
+    esac
+  fi
+
+  if [[ "$scheme" == '-Dracula' ]]; then
+    case "$theme" in
+      '')
+        theme_color='#6272a4'
+        ;;
+      -Purple)
+        theme_color='#bd93f9'
+        ;;
+      -Pink)
+        theme_color='#ff79c6'
+        ;;
+      -Red)
+        theme_color='#ff5555'
+        ;;
+      -Orange)
+        theme_color='#ffb86c'
+        ;;
+      -Yellow)
+        theme_color='#f1fa8c'
+        ;;
+      -Green)
+        theme_color='#50fa7b'
+        ;;
+      -Teal)
+        theme_color='#50fae9'
+        ;;
+      -Grey)
+        theme_color='#757a99'
+        ;;
+    esac
+  fi
+
+  if [[ "$scheme" == '-Gruvbox' ]]; then
+    case "$theme" in
+      '')
+        theme_color='#83a598'
+        ;;
+      -Purple)
+        theme_color='#d386cd'
+        ;;
+      -Pink)
+        theme_color='#d3869b'
+        ;;
+      -Red)
+        theme_color='#fb4934'
+        ;;
+      -Orange)
+        theme_color='#fe8019'
+        ;;
+      -Yellow)
+        theme_color='#fabd2f'
+        ;;
+      -Green)
+        theme_color='#b8bb26'
+        ;;
+      -Teal)
+        theme_color='#8ec07c'
+        ;;
+      -Grey)
+        theme_color='#868686'
+        ;;
+    esac
+  fi
+
+  if [[ "$scheme" == '-Everforest' ]]; then
+    case "$theme" in
+      '')
+        theme_color='#7fbbb3'
+        ;;
+      -Purple)
+        theme_color='#D699B6'
+        ;;
+      -Pink)
+        theme_color='#d3869b'
+        ;;
+      -Red)
+        theme_color='#E67E80'
+        ;;
+      -Orange)
+        theme_color='#E69875'
+        ;;
+      -Yellow)
+        theme_color='#DBBC7F'
+        ;;
+      -Green)
+        theme_color='#A7C080'
+        ;;
+      -Teal)
+        theme_color='#83C092'
+        ;;
+      -Grey)
+        theme_color='#7a8478'
+        ;;
+    esac
+  fi
+
+  if [[ "$scheme" == '-Catppuccin' ]]; then
+    case "$theme" in
+      '')
+        theme_color='#8caaee'
+        ;;
+      -Purple)
+        theme_color='#ca9ee6'
+        ;;
+      -Pink)
+        theme_color='#f4b8e4'
+        ;;
+      -Red)
+        theme_color='#ea999c'
+        ;;
+      -Orange)
+        theme_color='#fe8019'
+        ;;
+      -Yellow)
+        theme_color='#ef9f76'
+        ;;
+      -Green)
+        theme_color='#a6d189'
+        ;;
+      -Teal)
+        theme_color='#81c8be'
+        ;;
+      -Grey)
+        theme_color='#7c7f93'
+        ;;
+    esac
+  fi
+}
+
 while [[ "$#" -gt 0 ]]; do
   case "${1:-}" in
     -d|--dest)
@@ -164,32 +361,32 @@ while [[ "$#" -gt 0 ]]; do
             ;;
           nord)
             schemes+=("${SCHEME_VARIANTS[1]}")
-            echo -e "\nNord ColorScheme version! ..."
+            echo -e "\nNord ColorScheme version! ...\n"
             shift
             ;;
           dracula)
             schemes+=("${SCHEME_VARIANTS[2]}")
-            echo -e "\nDracula ColorScheme version! ..."
+            echo -e "\nDracula ColorScheme version! ...\n"
             shift
             ;;
           gruvbox)
             schemes+=("${SCHEME_VARIANTS[3]}")
-            echo -e "\nGruvbox ColorScheme version! ..."
+            echo -e "\nGruvbox ColorScheme version! ...\n"
             shift
             ;;
           everforest)
             schemes+=("${SCHEME_VARIANTS[4]}")
-            echo -e "\nEverforest ColorScheme version! ..."
+            echo -e "\nEverforest ColorScheme version! ...\n"
             shift
             ;;
           catppuccin)
             schemes+=("${SCHEME_VARIANTS[5]}")
-            echo -e "\nCatppuccin ColorScheme version! ..."
+            echo -e "\nCatppuccin ColorScheme version! ...\n"
             shift
             ;;
           all)
             schemes+=("${SCHEME_VARIANTS[@]}")
-            echo -e "\All ColorSchemes version! ..."
+            echo -e "\All ColorSchemes version! ...\n"
             shift
             ;;
           -*|--*)
